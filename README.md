@@ -1,6 +1,6 @@
 # subscriptions-transport-ws-python
 
-Pure-Python, I/O-agnostic, asynchronous implementation for the `subscriptions-transport-ws` protocol.
+Pure-Python, I/O-agnostic, asynchronous implementation of the [`subscriptions-transport-ws`](https://github.com/apollographql/subscriptions-transport-ws) protocol.
 
 ## Installation
 
