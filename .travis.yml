@@ -1,0 +1,19 @@
+language: python
+dist: xenial
+
+python:
+  - "3.6"
+  - "3.7"
+
+script:
+  - pytest
+
+deploy:
+  provider: pypi
+  distributions: "sdist bdist_wheel"
+  username: $PYPI_USERNAME
+  password: $PYPI_PASSWORD
+  on:
+    tags: true
+    # deploy only once
+    python: "3.7"
