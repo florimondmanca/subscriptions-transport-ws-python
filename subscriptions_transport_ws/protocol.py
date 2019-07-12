@@ -14,7 +14,7 @@ class GQL:
     CONNECTION_INIT = "connection_init"
     START = "start"
     STOP = "stop"
-    CONNECTION_TERMINATE = "connection_terminate"
+    CONNECTION_unsubscribe = "connection_unsubscribe"
 
     # Server -> Client message types.
     CONNECTION_ERROR = "connection_error"
@@ -30,11 +30,25 @@ class Message(typing.NamedTuple):
     type: typing.Optional[str] = None
     payload: typing.Optional[dict] = None
 
-    _asdict: typing.Callable[[], dict]
-
-    @property
     def to_dict(self) -> dict:
-        return {k: v for k, v in self._asdict().items() if v is not None}
+        return {
+            k: v
+            for k, v in getattr(self, "_asdict")().items()
+            if v is not None
+        }
+
+    @classmethod
+    def parse(cls, data: typing.Any) -> "Message":
+        if not isinstance(data, dict):
+            data = json.loads(data)
+            if not isinstance(data, dict):
+                raise ValueError("payload must be a JSON object")
+
+        return cls(
+            id=data.get("id"),
+            type=data.get("type"),
+            payload=data.get("payload", {}),
+        )
 
 
 class GraphQLWSProtocol:
@@ -47,21 +61,6 @@ class GraphQLWSProtocol:
         self._subscribe = subscribe
 
     # Helpers.
-
-    async def _parse(self, data: typing.Any) -> Message:
-        if not isinstance(data, dict):
-            try:
-                data = json.loads(data)
-                if not isinstance(data, dict):
-                    raise TypeError("payload must be a JSON object")
-            except TypeError as exc:
-                await self._send_error(exc)
-
-        return Message(
-            id=data.get("id"),
-            type=data.get("type"),
-            payload=data.get("payload"),
-        )
 
     async def _send_message(self, message: Message) -> None:
         await self._send(message.to_dict())
@@ -84,7 +83,7 @@ class GraphQLWSProtocol:
 
     async def _execute(self, operation_id: int, payload: dict) -> None:
         stream = self._subscribe(
-            query=payload["query"],
+            query=payload.get("query"),
             variables=payload.get("variables"),
             operation_name=payload.get("operationName"),
         )
@@ -101,14 +100,14 @@ class GraphQLWSProtocol:
                 await self._send_message(
                     Message(id=operation_id, type="complete")
                 )
-                await self._terminate(operation_id)
+                await self._unsubscribe(operation_id)
         except Exception as exc:  # pylint: disable=broad-except
             await self._send_error(
                 Exception("Internal error"), operation_id=operation_id
             )
             raise exc
 
-    async def _terminate(self, operation_id: int):
+    async def _unsubscribe(self, operation_id: int):
         operation: typing.AsyncGenerator = self._operations.pop(
             operation_id, None
         )
@@ -118,23 +117,26 @@ class GraphQLWSProtocol:
 
     # Client event handlers.
 
-    async def _on_connection_init(self, operation_id: int, **_) -> None:
+    async def _on_connection_init(self, message: Message) -> None:
         try:
-            await self._send_message(Message(type=GQL.CONNECTION_ACK))
+            await self._send_message(
+                Message(id=message.id, type=GQL.CONNECTION_ACK)
+            )
         except Exception as exc:  # pylint: disable=broad-except
             await self._send_error(
-                exc, operation_id=operation_id, error_type=GQL.CONNECTION_ERROR
+                exc, operation_id=message.id, error_type=GQL.CONNECTION_ERROR
             )
             self._close(1011)
+            raise
 
     async def _on_start(self, message: Message) -> None:
         if message.id in self._operations:
-            await self._terminate(message.id)
+            await self._unsubscribe(message.id)
 
         await self._execute(operation_id=message.id, payload=message.payload)
 
     async def _on_stop(self, message: Message) -> None:
-        await self._terminate(message.id)
+        await self._unsubscribe(message.id)
 
     async def _on_connection_terminate(self, _: Message) -> None:
         await self._close(1011)
@@ -142,7 +144,10 @@ class GraphQLWSProtocol:
     # Public API.
 
     async def __call__(self, data: typing.Any):
-        message = self._parse(data)
+        try:
+            message = Message.parse(data)
+        except ValueError as exc:
+            await self._send_error(exc)
 
         try:
             handler = getattr(self, f"_on_{message.type}", None)
@@ -157,4 +162,4 @@ class GraphQLWSProtocol:
     async def stop(self):
         # NOTE: load keys in list to prevent "size changed during iteration".
         for operation_id in list(self._operations):
-            await self._terminate(operation_id)
+            await self._unsubscribe(operation_id)
