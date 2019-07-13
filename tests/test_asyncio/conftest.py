@@ -5,6 +5,8 @@ import pytest
 
 from subscriptions_transport_ws import GraphQLWSProtocol
 
+from .websocket import WebSocket
+
 
 @pytest.fixture(name="tasks")
 def fixture_tasks() -> set:
@@ -16,27 +18,9 @@ def fixture_tasks() -> set:
             task.cancel()
 
 
-@pytest.fixture(name="queue")
-def fixture_queue() -> asyncio.Queue:
-    return asyncio.Queue()
-
-
-@pytest.fixture(name="send")
-def fixture_send(queue: asyncio.Queue):
-    async def send(message: dict):
-        queue.put_nowait(message)
-        await asyncio.sleep(0)  # allow other tasks to run
-
-    return send
-
-
-@pytest.fixture(name="close")
-def fixture_close(queue: asyncio.Queue):
-    async def close(close_code: int):
-        queue.put_nowait({"close_code": close_code})
-        await asyncio.sleep(0)  # allow other tasks to run
-
-    return close
+@pytest.fixture(name="ws")
+def fixture_ws() -> WebSocket:
+    return WebSocket()
 
 
 @pytest.fixture(name="values_to_send")
@@ -55,5 +39,10 @@ def fixture_subscribe(values_to_send):
 
 
 @pytest.fixture(name="proto")
-def fixture_proto(send, close, subscribe) -> GraphQLWSProtocol:
-    return GraphQLWSProtocol(send=send, close=close, subscribe=subscribe)
+def fixture_proto(ws: WebSocket, subscribe) -> GraphQLWSProtocol:
+    return GraphQLWSProtocol(
+        send=ws.send,
+        close=ws.close,
+        subscribe=subscribe,
+        raised_when_closed=(asyncio.CancelledError,),
+    )
