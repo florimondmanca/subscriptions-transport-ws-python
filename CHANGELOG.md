@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `asyncio` + `websockets` example.
+
+### Fixed
+
+- Ensure that `subscribe()` receives an empty dictionary of `variables`, even if the client did not include it in the payload.
+
 ## [0.1.0] - 2019-13-07
 
 ### Added
