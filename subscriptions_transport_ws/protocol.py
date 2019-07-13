@@ -59,13 +59,13 @@ class GraphQLWSProtocol:
         send: Send,
         subscribe: Subscribe,
         close: Close,
-        closed_exception=(),
+        raised_when_closed: typing.Tuple[typing.Type[Exception]] = (),
     ):
         self._operations: typing.Dict[int, typing.AsyncGenerator] = {}
         self._send = send
         self._subscribe = subscribe
         self._close = close
-        self._closed_exception = closed_exception
+        self._raised_when_closed = raised_when_closed
 
     # Helpers.
 
@@ -103,8 +103,8 @@ class GraphQLWSProtocol:
                 await self._send_message(
                     Message(id=operation_id, type="data", payload=item)
                 )
-        except Exception as exc:  # pylint: disable=broad-except
-            if not isinstance(exc, self._closed_exception):
+        except BaseException as exc:  # pylint: disable=broad-except
+            if not isinstance(exc, self._raised_when_closed):
                 await self._send_error(
                     Exception("Internal error"), operation_id=operation_id
                 )
