@@ -14,7 +14,7 @@ class GQL:
     CONNECTION_INIT = "connection_init"
     START = "start"
     STOP = "stop"
-    CONNECTION_unsubscribe = "connection_unsubscribe"
+    CONNECTION_TERMINATE = "connection_terminate"
 
     # Server -> Client message types.
     CONNECTION_ERROR = "connection_error"
@@ -54,11 +54,18 @@ class Message(typing.NamedTuple):
 class GraphQLWSProtocol:
     name = "graphql-ws"
 
-    def __init__(self, send: Send, close: Close, subscribe: Subscribe):
+    def __init__(
+        self,
+        send: Send,
+        subscribe: Subscribe,
+        close: Close,
+        closed_exception=(),
+    ):
         self._operations: typing.Dict[int, typing.AsyncGenerator] = {}
         self._send = send
-        self._close = close
         self._subscribe = subscribe
+        self._close = close
+        self._closed_exception = closed_exception
 
     # Helpers.
 
@@ -97,9 +104,10 @@ class GraphQLWSProtocol:
                     Message(id=operation_id, type="data", payload=item)
                 )
         except Exception as exc:  # pylint: disable=broad-except
-            await self._send_error(
-                Exception("Internal error"), operation_id=operation_id
-            )
+            if not isinstance(exc, self._closed_exception):
+                await self._send_error(
+                    Exception("Internal error"), operation_id=operation_id
+                )
             raise exc
         else:
             await self._send_message(Message(id=operation_id, type="complete"))
@@ -148,9 +156,14 @@ class GraphQLWSProtocol:
         except ValueError as exc:
             await self._send_error(exc)
 
-        try:
-            handler = getattr(self, f"_on_{message.type}", None)
-        except AttributeError:
+        handler = {
+            GQL.CONNECTION_INIT: self._on_connection_init,
+            GQL.START: self._on_start,
+            GQL.STOP: self._on_stop,
+            GQL.CONNECTION_TERMINATE: self._on_connection_terminate,
+        }.get(message.type)
+
+        if handler is None:
             await self._send_error(
                 Exception(f"Unhandled message type: {message.type}"),
                 operation_id=message.id,
