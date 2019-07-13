@@ -91,7 +91,7 @@ class GraphQLWSProtocol:
     async def _execute(self, operation_id: int, payload: dict) -> None:
         stream = self._subscribe(
             query=payload.get("query"),
-            variables=payload.get("variables"),
+            variables=payload.get("variables", {}),
             operation_name=payload.get("operationName"),
         )
         self._operations[operation_id] = stream
