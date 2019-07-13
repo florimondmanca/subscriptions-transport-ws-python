@@ -96,16 +96,15 @@ class GraphQLWSProtocol:
                 await self._send_message(
                     Message(id=operation_id, type="data", payload=item)
                 )
-            else:
-                await self._send_message(
-                    Message(id=operation_id, type="complete")
-                )
-                await self._unsubscribe(operation_id)
         except Exception as exc:  # pylint: disable=broad-except
             await self._send_error(
                 Exception("Internal error"), operation_id=operation_id
             )
             raise exc
+        else:
+            await self._send_message(Message(id=operation_id, type="complete"))
+        finally:
+            await self._unsubscribe(operation_id)
 
     async def _unsubscribe(self, operation_id: int):
         operation: typing.AsyncGenerator = self._operations.pop(

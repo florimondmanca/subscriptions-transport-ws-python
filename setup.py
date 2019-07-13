@@ -40,7 +40,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[],
-    extras_require={"dev": ["pytest", "black", "pylint"]},
+    extras_require={"dev": ["pytest", "pytest-asyncio", "black", "pylint"]},
     python_requires=">=3.6",
     # license and classifier list:
     # https://pypi.org/pypi?%3Aaction=list_classifiers
