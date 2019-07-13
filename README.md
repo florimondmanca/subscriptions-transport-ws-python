@@ -4,13 +4,11 @@ Pure Python, asynchronous, event-loop-agnostic implementation of the [subscripti
 
 ## Installation
 
-> Coming soon.
+This package is not yet available on PyPI. For now, you can install the latest version using:
 
-<!--
 ```bash
-pip install subscriptions-transport-ws
+pip install "git+https://github.com/florimondmanca/subscriptions-transport-ws-python.git"
 ```
--->
 
 ## Example
 
