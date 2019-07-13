@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to this project! Here are some tips to get you started.
 
-1. Consider [opening an issue](https://github.com/tartiflette/subscriptions-transport-ws-python/issues/new) if the change you're proposing is not trivial. :+1:
+1. Consider [opening an issue](https://github.com/florimondmanca/subscriptions-transport-ws-python/issues/new) if the change you're proposing is not trivial. :+1:
 2. Fork this repo and clone it to your machine.
 3. Create a virtual environment and install development dependencies:
 
@@ -19,4 +19,4 @@ pip install -r requirements.txt
 pytest
 ```
 
-6. Once the feature or bug fix is ready enough to be reviewed, [open a pull request!](https://github.com/tartiflette/subscriptions-transport-ws-python/compare) :rocket:
+6. Once the feature or bug fix is ready enough to be reviewed, [open a pull request!](https://github.com/florimondmanca/subscriptions-transport-ws-python/compare) :rocket:

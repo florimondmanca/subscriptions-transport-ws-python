@@ -30,12 +30,12 @@ setup(
     author="Florimond Manca",
     author_email="florimond.manca@gmail.com",
     description=(
-        "Pure Python, I/O-agnostic, asynchronous implementation for the "
-        "subscriptions-transport-ws protocol."
+        "Pure Python, asynchronous, event-loop-agnostic implementation of "
+        "the subscriptions-transport-ws protocol"
     ),
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/tartiflette/subscriptions-transport-ws-python",
+    url="https://github.com/florimondmanca/subscriptions-transport-ws-python",
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     include_package_data=True,
     zip_safe=False,

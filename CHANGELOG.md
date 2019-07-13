@@ -14,4 +14,4 @@ Project-related additions:
 - Contributing guide.
 - README and documentation.
 
-[unreleased]: https://github.com/tartiflette/subscriptions-transport-ws-python/compare/0.5.0...HEAD
+[unreleased]: https://github.com/florimondmanca/subscriptions-transport-ws-python/compare/0.5.0...HEAD
