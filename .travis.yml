@@ -7,13 +7,12 @@ python:
 
 script:
   - pytest
-
-deploy:
-  provider: pypi
-  distributions: "sdist bdist_wheel"
-  username: $PYPI_USERNAME
-  password: $PYPI_PASSWORD
-  on:
-    tags: true
-    # deploy only once
-    python: "3.7"
+# deploy:
+#   provider: pypi
+#   distributions: "sdist bdist_wheel"
+#   username: $PYPI_USERNAME
+#   password: $PYPI_PASSWORD
+#   on:
+#     tags: true
+#     # deploy only once
+#     python: "3.7"
