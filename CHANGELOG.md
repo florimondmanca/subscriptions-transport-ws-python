@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2019-13-07
+
 ### Added
 
 - `GraphQLWSProtocol` class.
@@ -19,4 +21,5 @@ Project-related additions:
 - Contributing guide.
 - README and documentation.
 
-[unreleased]: https://github.com/florimondmanca/subscriptions-transport-ws-python/compare/0.5.0...HEAD
+[unreleased]: https://github.com/florimondmanca/subscriptions-transport-ws-python/compare/0.1.0...HEAD
+[0.1.0]: https://github.com/florimondmanca/subscriptions-transport-ws-python/compare/21655bd67577617fba051b5d3126e1216b0a2958...0.1.0
