@@ -9,7 +9,9 @@ async def client():
     This is a Python example, but queries could just as well be issued by
     a GraphiQL client or an Apollo GraphQL client.
     """
-    async with websockets.connect("ws://localhost:8001") as websocket:
+    async with websockets.connect(
+        "ws://localhost:8001", subprotocols=["graphql-ws"]
+    ) as websocket:
 
         async def receive() -> dict:
             return json.loads(await websocket.recv())

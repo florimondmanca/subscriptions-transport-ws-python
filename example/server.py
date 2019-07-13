@@ -44,5 +44,9 @@ async def server(websocket, *_):
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(websockets.serve(server, "localhost", 8001))
+    loop.run_until_complete(
+        websockets.serve(
+            server, "localhost", 8001, subprotocols=[GraphQLWSProtocol.name]
+        )
+    )
     loop.run_forever()
